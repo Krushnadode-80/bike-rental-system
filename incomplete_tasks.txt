@@ -1,0 +1,49 @@
+=========================================================
+BIKE RENTAL SYSTEM — FRONTEND & INTEGRATION STATUS
+=========================================================
+Backend and React app are wired end-to-end with JWT auth,
+protected routes, filters, booking flows, admin dashboard,
+and optional fleet management (admin role).
+
+Admin fleet (POST/PUT/DELETE /bikes): set a user to admin in the DB, e.g.
+  UPDATE users SET role = 'admin' WHERE email = 'you@example.com';
+
+Optional: REACT_APP_API_URL for a non-default API origin.
+
+---------------------------------------------------------
+1. FRONTEND ROUTING & SETUP
+---------------------------------------------------------
+[x] react-router-dom for all main pages.
+[x] JWT in localStorage + AuthContext (/me for profile & role).
+
+---------------------------------------------------------
+2. USER AUTHENTICATION PAGES
+---------------------------------------------------------
+[x] Login (API + redirect to prior route when applicable).
+[x] Register (split premium layout + POST /register).
+[x] Logout clears session and sends user to login.
+
+---------------------------------------------------------
+3. CORE UI COMPONENTS
+---------------------------------------------------------
+[x] Navbar: Home, My Bookings, Dashboard, Fleet (admin), Login/Register/Logout.
+
+---------------------------------------------------------
+4. BIKE BROWSING (USER PAGES)
+---------------------------------------------------------
+[x] Home: GET /available-bikes grid + hero and sticky filter sidebar.
+[x] Search + GET /search-bike; brand + GET /filter-brand; price + GET /filter-price.
+     (Brand/price results are narrowed to available bikes in the UI.)
+
+---------------------------------------------------------
+5. BOOKING SYSTEM
+---------------------------------------------------------
+[x] Book bike modal: POST /book-bike with Bearer token (user id from JWT on server).
+[x] My Bookings: GET /my-bookings with bike names resolved via GET /bikes.
+[x] Cancel: DELETE /cancel-booking/{id} with ownership enforced server-side.
+
+---------------------------------------------------------
+6. ADMIN DASHBOARD (ADMIN PAGES)
+---------------------------------------------------------
+[x] Dashboard: GET /admin/dashboard (requires login) with revenue & fleet cards.
+[x] Fleet management UI: GET/POST/PUT/DELETE bikes at /admin/fleet (admin role only).

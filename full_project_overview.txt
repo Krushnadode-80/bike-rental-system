@@ -1,0 +1,856 @@
+=========================================================
+BIKE RENTAL SYSTEM - FULL PROJECT OVERVIEW
+=========================================================
+
+This document is a corrected project-wide overview based on the
+current source code in this repository.
+
+It covers:
+
+1. What the project is
+2. What is already completed
+3. Backend structure and flow
+4. Frontend structure and flow
+5. Database and authentication details
+6. Current routes and features
+7. What is incomplete
+8. Real bugs / mismatches currently present
+9. Missing setup / production readiness gaps
+10. Suggested next priorities
+
+
+---------------------------------------------------------
+1. PROJECT PURPOSE
+---------------------------------------------------------
+
+This is a full-stack Bike Rental System built with:
+
+- FastAPI backend
+- React frontend
+- PostgreSQL database
+- JWT authentication
+
+Main intended use:
+
+- Users can register and log in
+- Users can browse bikes
+- Users can search and filter bikes
+- Users can book bikes for selected dates
+- Users can see their own bookings
+- Users can cancel their own bookings
+- Admins can manage bike inventory
+- Admins can view dashboard statistics
+
+Important correction:
+- The dashboard is not for all logged-in users.
+- The dashboard is admin-only in both backend and frontend.
+
+
+---------------------------------------------------------
+2. CURRENT COMPLETION STATUS
+---------------------------------------------------------
+
+The project is partially complete and mostly functional as a
+working CRUD + auth + booking application.
+
+Completed and working at a high level:
+
+- User registration
+- User login
+- JWT-based protected APIs
+- Current logged-in user API (`/me`)
+- Admin role checking
+- Bike add/update/delete for admins
+- Bike image field support
+- Cloudinary image upload endpoint for admins
+- Bike listing with pagination
+- Available bike listing with pagination
+- Search by bike name
+- Filter by brand
+- Filter by price range
+- Booking creation
+- Basic overlapping date check in backend
+- My bookings list
+- Booking cancellation
+- Admin dashboard totals
+- Frontend protected routes
+- Frontend admin-only routes
+- React pages for login, register, home, bookings, dashboard, and fleet management
+
+Not fully complete:
+
+- Booking business rules are incomplete
+- Some frontend/backend integration is mismatched
+- Migration history has an issue
+- Setup and deployment are incomplete
+- Testing and documentation are incomplete
+
+
+---------------------------------------------------------
+3. BACKEND OVERVIEW
+---------------------------------------------------------
+
+Backend folder:
+- `backend/`
+
+Backend entry point:
+- `backend/main.py`
+
+Current backend behavior in `main.py`:
+
+- Creates FastAPI app
+- Enables CORS for all origins
+- Imports models
+- Registers routers:
+  - `auth_routes.py`
+  - `bike_routes.py`
+  - `booking_routes.py`
+  - `dashboard_routes.py`
+- Exposes root route `/`
+
+Root response:
+- `{"message": "Bike Rental API Running"}`
+
+
+---------------------------------------------------------
+4. FRONTEND OVERVIEW
+---------------------------------------------------------
+
+Frontend folder:
+- `frontend/`
+
+Frontend structure:
+
+- `src/index.js` bootstraps React app
+- `src/App.js` defines routes
+- `src/context/AuthContext.js` manages auth session
+- `src/api/client.js` manages Axios instance and auth headers
+- `src/components/ProtectedRoute.js` protects authenticated/admin routes
+- `src/components/Navbar.js` shows route links based on auth state
+
+Frontend routes:
+
+- `/` -> Home page
+- `/login` -> Login page
+- `/register` -> Register page
+- `/my-bookings` -> Logged-in users only
+- `/dashboard` -> Admin only
+- `/admin/fleet` -> Admin only
+
+
+---------------------------------------------------------
+5. BACKEND FLOW
+---------------------------------------------------------
+
+Typical request flow:
+
+1. React sends request through Axios
+2. FastAPI route receives request
+3. Pydantic validates request body/query data
+4. JWT dependency checks protected routes when required
+5. SQLAlchemy queries PostgreSQL
+6. FastAPI returns JSON response
+7. React updates UI
+
+Booking flow in current code:
+
+1. User logs in
+2. JWT is stored in browser localStorage
+3. User opens booking modal on home page
+4. Frontend calculates total price and sends:
+   - `bike_id`
+   - `booking_date`
+   - `return_date`
+   - `total_price`
+5. Backend gets current user from token
+6. Backend checks bike exists
+7. Backend checks bike availability equals `available`
+8. Backend checks for overlapping `booked` rows for same bike
+9. Backend creates booking row
+10. Backend changes bike availability to `not available`
+11. Frontend refreshes the available bike list
+
+
+---------------------------------------------------------
+6. AUTHENTICATION DETAILS
+---------------------------------------------------------
+
+Auth file:
+- `backend/auth/auth_handler.py`
+
+Current auth implementation:
+
+- `OAuth2PasswordBearer`
+- JWT using `HS256`
+- `passlib` bcrypt hashing
+- 1 hour access token expiry
+
+Environment-based config now used:
+
+- `SECRET_KEY` is loaded from `.env`
+- `DATABASE_URL` is loaded from `.env`
+
+Important correction:
+- Older documentation in this repo said DB URL and secret were hardcoded.
+- That is no longer true in current source code.
+
+Current `.env` contents show:
+
+- `DATABASE_URL=postgresql://postgres:krushna%402004@localhost:5432/Server_side`
+- `SECRET_KEY=mysecretkey`
+- Cloudinary placeholder values
+
+Security observations:
+
+- Secrets are now read from `.env`
+- But `.env` is present in the repo and includes sensitive values/placeholders
+- CORS is still open to all origins
+- There is no refresh token flow
+- There is no password reset or email verification flow
+
+
+---------------------------------------------------------
+7. DATABASE OVERVIEW
+---------------------------------------------------------
+
+Database file:
+- `backend/database/database.py`
+
+Database stack:
+
+- PostgreSQL
+- SQLAlchemy
+- Alembic
+- dotenv-based configuration
+
+Current DB session flow:
+
+- `load_dotenv()` loads `.env`
+- `DATABASE_URL = os.getenv("DATABASE_URL")`
+- `create_engine(DATABASE_URL)`
+- `SessionLocal` is used per request via `get_db()`
+
+Current models:
+
+1. `users`
+2. `bikes`
+3. `bookings`
+
+
+---------------------------------------------------------
+8. CURRENT MODELS
+---------------------------------------------------------
+
+`users` table
+File:
+- `backend/models/user_model.py`
+
+Columns:
+- `id`
+- `name`
+- `email`
+- `password`
+- `role`
+
+Notes:
+- `email` is unique
+- `role` defaults to `user`
+
+
+`bikes` table
+File:
+- `backend/models/bike_model.py`
+
+Columns:
+- `id`
+- `bike_name`
+- `brand`
+- `model`
+- `price_per_day`
+- `availability`
+- `bike_image`
+
+Notes:
+- Bike image URL support exists
+- Availability is stored as text, not boolean/enum
+
+
+`bookings` table
+File:
+- `backend/models/booking_model.py`
+
+Columns:
+- `id`
+- `user_id`
+- `bike_id`
+- `booking_date`
+- `return_date`
+- `total_price`
+- `status`
+
+Notes:
+- `user_id` has foreign key to `users.id`
+- `bike_id` has foreign key to `bikes.id`
+- `booking_date` and `return_date` are proper `Date` columns
+
+Important correction:
+- Older overview text said booking dates were strings and no foreign keys existed.
+- That is outdated. Current model uses `Date` and `ForeignKey`.
+
+Still missing in models:
+- No SQLAlchemy `relationship()` definitions
+- No enum types for status/availability
+- No audit timestamps like `created_at` / `updated_at`
+
+
+---------------------------------------------------------
+9. CURRENT SCHEMAS / VALIDATION
+---------------------------------------------------------
+
+User schema:
+- `backend/schemas/user_schema.py`
+
+Validation:
+- `email` uses `EmailStr`
+- Password must:
+  - be at least 8 characters
+  - contain at least one number
+  - contain at least one special character
+
+Bike schema:
+- `backend/schemas/bike_schema.py`
+
+Fields:
+- `bike_name`
+- `brand`
+- `model`
+- `price_per_day`
+- `availability`
+- `bike_image` optional
+
+Booking schema:
+- `backend/schemas/booking_schema.py`
+
+Fields:
+- `user_id` optional and ignored in logic
+- `bike_id`
+- `booking_date`
+- `return_date`
+- `total_price`
+
+Validation:
+- return date cannot be earlier than booking date
+
+Still missing in validation:
+
+- No validation that booking date is today or future
+- No validation that total price is positive
+- No server-side recomputation of total price
+- No strict allowed values for availability/status
+
+
+---------------------------------------------------------
+10. CURRENT BACKEND ROUTES
+---------------------------------------------------------
+
+Authentication routes:
+
+`POST /register`
+- Registers user
+- Rejects duplicate email
+- Hashes password
+
+`POST /login`
+- Verifies email/password
+- Returns JWT access token
+
+`GET /current-user`
+- Returns token subject email
+
+`GET /me`
+- Returns current user details:
+  - `id`
+  - `name`
+  - `email`
+  - `role`
+
+
+Bike routes:
+
+`POST /bikes`
+- Admin only
+- Creates bike
+
+`GET /bikes`
+- Returns paginated bike list
+- Query params:
+  - `page`
+  - `limit`
+
+Response shape:
+- `items`
+- `total`
+- `page`
+- `limit`
+- `pages`
+
+`PUT /bikes/{bike_id}`
+- Admin only
+- Updates bike
+
+`DELETE /bikes/{bike_id}`
+- Admin only
+- Deletes bike
+
+`POST /upload-bike-image`
+- Admin only
+- Uploads image to Cloudinary
+- Returns `image_url`
+
+`GET /search-bike`
+- Searches by `bike_name`
+- Returns matching bikes
+
+`GET /available-bikes`
+- Returns paginated available bikes only
+
+`GET /filter-brand`
+- Returns bikes matching `brand`
+
+`GET /filter-price`
+- Returns bikes within price range
+
+
+Booking routes:
+
+`POST /book-bike`
+- Logged-in users only
+- Uses authenticated user from token
+- Checks bike exists
+- Checks current bike availability
+- Checks overlapping booking date range
+- Creates booking
+- Marks bike as `not available`
+
+`GET /my-bookings`
+- Logged-in users only
+- Returns current user's bookings
+
+`DELETE /cancel-booking/{booking_id}`
+- Logged-in users only
+- User can cancel only own booking
+- Sets booking status to `cancelled`
+- Sets bike availability back to `available`
+
+
+Dashboard route:
+
+`GET /admin/dashboard`
+- Admin only
+- Returns:
+  - total users
+  - total bikes
+  - total bookings
+  - available bikes
+  - total revenue from bookings with status `booked`
+
+
+---------------------------------------------------------
+11. CURRENT FRONTEND PAGES
+---------------------------------------------------------
+
+`HomePage.js`
+
+Completed:
+- Fetches paginated available bikes
+- Search by bike name
+- Filter by brand
+- Filter by price
+- Booking modal
+- Frontend booking price calculation
+- Pagination controls
+- Admin shortcut panel for admins
+
+Notes:
+- Search/filter endpoints return full arrays, not paginated results
+- UI narrows these results to available bikes only on the frontend
+
+
+`LoginPage.js`
+
+Completed:
+- Login form
+- Calls `/login`
+- Saves JWT through AuthContext
+- Redirects back to original route when appropriate
+
+
+`RegisterPage.js`
+
+Completed:
+- Registration form
+- Calls `/register`
+- Shows backend validation errors
+- Redirects to login after success
+
+
+`MyBookingsPage.js`
+
+Completed:
+- Fetches `/my-bookings`
+- Shows booking status, dates, and total price
+- Allows cancellation for active bookings
+
+Current issue:
+- It tries to fetch `/bikes` and treats response as an array
+- But `/bikes` now returns paginated object
+- Because of that, bike name mapping is broken or incomplete
+
+
+`DashboardPage.js`
+
+Completed:
+- Admin-only dashboard view
+- Loads `/admin/dashboard`
+- Shows stats cards
+
+
+`AdminBikesPage.js`
+
+Completed:
+- Load bikes
+- Add bike
+- Edit bike
+- Delete bike
+- Upload image via Cloudinary
+- Preview uploaded image
+
+Dependency note:
+- Image upload only works if Cloudinary credentials are configured correctly
+
+
+---------------------------------------------------------
+12. LIBRARIES / TOOLS CURRENTLY USED
+---------------------------------------------------------
+
+Backend:
+
+- FastAPI
+- SQLAlchemy
+- Alembic
+- PostgreSQL
+- python-jose
+- passlib
+- bcrypt
+- pydantic
+- python-dotenv
+- cloudinary
+
+Frontend:
+
+- React
+- ReactDOM
+- react-router-dom
+- Axios
+- react-scripts
+
+Frontend test libraries present:
+
+- `@testing-library/react`
+- `@testing-library/dom`
+- `@testing-library/jest-dom`
+- `@testing-library/user-event`
+- `web-vitals`
+
+
+---------------------------------------------------------
+13. PROJECT STRUCTURE
+---------------------------------------------------------
+
+Root:
+
+bike-rental-system/
+|-- backend/
+|   |-- main.py
+|   |-- migrate_db.py
+|   |-- check_columns.py
+|   |-- alembic.ini
+|   |-- auth/
+|   |   `-- auth_handler.py
+|   |-- database/
+|   |   `-- database.py
+|   |-- models/
+|   |   |-- user_model.py
+|   |   |-- bike_model.py
+|   |   `-- booking_model.py
+|   |-- routes/
+|   |   |-- admin_deps.py
+|   |   |-- auth_routes.py
+|   |   |-- bike_routes.py
+|   |   |-- booking_routes.py
+|   |   `-- dashboard_routes.py
+|   |-- schemas/
+|   |   |-- user_schema.py
+|   |   |-- bike_schema.py
+|   |   `-- booking_schema.py
+|   |-- utils/
+|   |   `-- cloudinary_config.py
+|   |-- alembic/
+|   |   `-- versions/
+|   `-- venv/
+|
+|-- frontend/
+|   |-- package.json
+|   |-- package-lock.json
+|   |-- README.md
+|   |-- public/
+|   |-- src/
+|   |   |-- App.js
+|   |   |-- index.js
+|   |   |-- index.css
+|   |   |-- api/
+|   |   |   `-- client.js
+|   |   |-- components/
+|   |   |   |-- Navbar.js
+|   |   |   |-- Navbar.css
+|   |   |   `-- ProtectedRoute.js
+|   |   |-- context/
+|   |   |   `-- AuthContext.js
+|   |   `-- pages/
+|   |       |-- HomePage.js
+|   |       |-- HomePage.css
+|   |       |-- LoginPage.js
+|   |       |-- LoginPage.css
+|   |       |-- RegisterPage.js
+|   |       |-- MyBookingsPage.js
+|   |       |-- MyBookingsPage.css
+|   |       |-- DashboardPage.js
+|   |       |-- DashboardPage.css
+|   |       |-- AdminBikesPage.js
+|   |       `-- AdminBikesPage.css
+|   |-- build/
+|   `-- node_modules/
+|
+|-- .env
+|-- project_info.txt
+|-- incomplete_tasks.txt
+`-- full_project_overview.txt
+
+
+---------------------------------------------------------
+14. REAL CURRENT PROBLEMS / BUGS
+---------------------------------------------------------
+
+These are actual code-level issues visible now.
+
+1. `MyBookingsPage.js` is not aligned with paginated `/bikes`
+
+- Frontend expects `GET /bikes` to return an array
+- Backend now returns paginated object
+- Bike name lookup for bookings can fail
+
+2. Alembic migration chain has duplicate bike image column creation
+
+- `0001_initial_schema.py` already creates `bike_image`
+- `0002_add_bike_image_column.py` adds `bike_image` again
+- Running migrations from a clean database can fail on revision `0002`
+
+3. Booking availability logic is inconsistent with date-range booking
+
+- Backend checks overlap by dates
+- But it also marks whole bike as `not available` after one booking
+- That means a future non-overlapping booking may still be blocked because
+  bike availability is global, not per date range
+
+4. Cancellation logic can incorrectly reopen bike availability
+
+- Cancelling one booking sets bike availability to `available`
+- This ignores whether another active booking exists for the same bike
+
+5. Booking total price is trusted from frontend
+
+- Frontend calculates total price
+- Backend stores it without recalculating
+- A client could manipulate total price before sending request
+
+6. Search/filter API behavior is inconsistent
+
+- `/bikes` and `/available-bikes` are paginated
+- `/search-bike`, `/filter-brand`, and `/filter-price` are not paginated
+- This creates inconsistent frontend behavior and API design
+
+7. Cloudinary setup is incomplete by default
+
+- `.env` contains placeholder Cloudinary values
+- Image upload endpoint exists
+- But upload will fail until real Cloudinary credentials are added
+
+8. UI text encoding/polish issue appears in source strings
+
+- Some frontend files contain mojibake-like text such as broken symbols
+- This suggests encoding cleanup may still be needed in UI copy
+
+
+---------------------------------------------------------
+15. WHAT IS INCOMPLETE IN THIS PROJECT
+---------------------------------------------------------
+
+This section directly answers: "What is incomplete in this project?"
+
+Business logic incomplete:
+
+- No proper completed-trip workflow
+- No pickup/return confirmation process
+- No payment integration
+- No refund/cancellation policy workflow
+- No server-side total price calculation
+- No booking date rule for past dates
+- No support for multiple future bookings for same bike with non-overlapping dates
+- No admin booking management page
+- No user profile edit feature
+- No forgot-password / reset-password flow
+- No email verification flow
+- No review/rating feature
+- No invoice/receipt generation
+- No notifications by email or SMS
+
+Admin/product incomplete:
+
+- No user management panel for admins
+- No admin role assignment UI
+- No booking analytics by bike/brand/day
+- No audit log for admin actions
+- No export/download reports
+- No booking search/sort/filter tools in admin dashboard
+
+Technical/backend incomplete:
+
+- No backend `requirements.txt`
+- No root `README.md`
+- No clear backend test suite
+- No CI/CD workflow
+- No Docker setup
+- No centralized logging
+- No monitoring or observability
+- No response models on many endpoints
+- No SQLAlchemy relationships between models
+- No standardized enums for statuses
+- No created/updated timestamps
+- No API versioning
+
+Frontend incomplete:
+
+- No profile page
+- No booking history filters/sorting
+- No booking reschedule/extension UI
+- No loading/error state standardization across all screens
+- No dedicated empty/error pages for all flows
+- No frontend tests visible in source
+
+Deployment/setup incomplete:
+
+- Secrets are present locally but not production-ready
+- No separate dev/staging/prod config strategy
+- No deployment files for backend/frontend
+- No reverse proxy or production server setup documented
+
+
+---------------------------------------------------------
+16. OUTDATED INFORMATION IN THE OLD OVERVIEW
+---------------------------------------------------------
+
+The previous `full_project_overview.txt` contained some outdated points.
+
+These old statements are no longer accurate:
+
+- DB URL is hardcoded in source code
+- JWT secret is hardcoded in source code
+- No image upload or bike image storage system
+- No pagination on bike list
+- Booking dates are stored as strings
+- Booking table has no explicit foreign keys
+- No `.env` based configuration for backend
+
+Current reality:
+
+- `.env` is used for DB URL and secret key
+- Bike image upload endpoint exists
+- Bike image column exists
+- `/bikes` and `/available-bikes` are paginated
+- Booking dates use SQL `Date`
+- Booking table includes foreign keys
+
+
+---------------------------------------------------------
+17. HELPER / MAINTENANCE FILES
+---------------------------------------------------------
+
+`backend/migrate_db.py`
+- Dev helper script
+- Drops and recreates tables directly from models
+- Can conflict conceptually with Alembic-managed migrations
+
+`backend/check_columns.py`
+- Checks `users` table columns
+- Adds `role` column if missing
+
+`backend/alembic/`
+- Migration environment
+
+Important note:
+- Since Alembic is now present, direct schema-reset scripts should be used
+  carefully and not mixed casually in normal migration flow.
+
+
+---------------------------------------------------------
+18. SUGGESTED NEXT PRIORITIES
+---------------------------------------------------------
+
+Best next fixes in order:
+
+1. Fix frontend `MyBookingsPage.js` to use `data.items` from `/bikes`
+2. Fix Alembic migration duplication for `bike_image`
+3. Move booking price calculation fully to backend
+4. Rework bike availability so bookings depend on date range, not just one
+   global availability string
+5. Fix cancellation logic to respect any remaining active bookings
+6. Add backend dependency file (`requirements.txt` or equivalent)
+7. Add backend/frontend tests for auth, booking, and admin flows
+8. Replace placeholder Cloudinary config with real environment setup docs
+9. Restrict CORS in non-development environments
+10. Add README with setup, migration, and run instructions
+
+
+---------------------------------------------------------
+19. FINAL SUMMARY
+---------------------------------------------------------
+
+This project is not empty or broken overall.
+
+It is already a real working full-stack bike rental application with:
+
+- authentication
+- admin authorization
+- bike inventory management
+- booking creation
+- booking cancellation
+- dashboard statistics
+- frontend pages for the major flows
+
+But it is not fully complete.
+
+The biggest incomplete areas are:
+
+- booking logic is still simplistic
+- one frontend page has API response mismatch
+- migrations need cleanup
+- production setup is incomplete
+- testing/documentation are incomplete
+
+So the project status is:
+
+- Core MVP: mostly completed
+- Business logic: partially completed
+- Production readiness: incomplete
+- Testing/documentation/setup: incomplete
+
