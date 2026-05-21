@@ -16,7 +16,7 @@ try:
     order = client.order.create({
         "amount": 10000,
         "currency": "INR",
-        "payment_capture": 1
+        "receipt": "test_receipt_1"
     })
     print(f"\nSUCCESS! Order created: {order['id']}")
     print(f"Amount: {order['amount']} paise")
