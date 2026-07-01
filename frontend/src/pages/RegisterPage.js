@@ -6,7 +6,7 @@ import { GoogleLogin } from '@react-oauth/google';
 import '../Auth.css'; // Import our new premium styles
 
 const RegisterPage = () => {
-  const { register, login } = useAuth();
+  const { register } = useAuth();
   const navigate = useNavigate();
 
   const [name, setName] = useState('');

@@ -4,11 +4,10 @@ import client from '../api/client';
 import { Calendar, Trash2, CheckCircle2, XCircle, Clock, Download, MapPin, QrCode, AlertCircle } from 'lucide-react';
 import '../Home.css';
 
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const MyBookingsPage = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -32,6 +31,7 @@ const MyBookingsPage = () => {
 
   useEffect(() => {
     fetchBookings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const handleCancelBooking = async (id) => {
@@ -144,9 +144,9 @@ const MyBookingsPage = () => {
             <p style={{ color: '#64748b', marginBottom: '32px', fontSize: '16px', maxWidth: '400px', margin: '0 auto 32px auto' }}>
               Your garage is currently empty. Book a premium motorcycle and start your next adventure today!
             </p>
-            <a href="/" style={{ backgroundColor: '#ff5e14', color: '#fff', padding: '16px 32px', borderRadius: '12px', textDecoration: 'none', fontWeight: 800, display: 'inline-block', boxShadow: '0 10px 20px rgba(255, 94, 20, 0.3)' }}>
+            <Link to="/" style={{ backgroundColor: '#ff5e14', color: '#fff', padding: '16px 32px', borderRadius: '12px', textDecoration: 'none', fontWeight: 800, display: 'inline-block', boxShadow: '0 10px 20px rgba(255, 94, 20, 0.3)' }}>
               Explore Fleet
-            </a>
+            </Link>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
