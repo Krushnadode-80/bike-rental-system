@@ -9,3 +9,4 @@ uploads/
 .vscode/
 .DS_Store
 frontendnpx/
+build/

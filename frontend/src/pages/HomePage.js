@@ -35,7 +35,6 @@ const HomePage = () => {
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('razorpay'); // 'razorpay' or 'upi'
   const [qrCodeData, setQrCodeData] = useState(null);
-  const [bookingSuccess, setBookingSuccess] = useState(false);
   const [bookingError, setBookingError] = useState(null);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
@@ -49,16 +48,12 @@ const HomePage = () => {
   const [kycPhone, setKycPhone] = useState('');
   const [kycAadhaar, setKycAadhaar] = useState('');
   const [kycAddress, setKycAddress] = useState('');
-  const [kycProfilePhoto, setKycProfilePhoto] = useState(null);
-  const [kycAadhaarDoc, setKycAadhaarDoc] = useState(null);
-  const [kycPanCard, setKycPanCard] = useState(null);
   const [aadhaarError, setAadhaarError] = useState(null);
   
   // KYC Upload URLs/State
   const [uploadedProfileUrl, setUploadedProfileUrl] = useState('');
   const [uploadedAadhaarUrl, setUploadedAadhaarUrl] = useState('');
   const [uploadedPanUrl, setUploadedPanUrl] = useState('');
-  const [kycFormSubmitted, setKycFormSubmitted] = useState(false);
 
   // OTP State
   const [otpSent, setOtpSent] = useState(false);
@@ -93,6 +88,7 @@ const HomePage = () => {
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   // Calculate rental pricing dynamically
@@ -153,7 +149,6 @@ const HomePage = () => {
     setSelectedBike(bike);
     setShowBookingModal(true);
     setBookingStep(isKycComplete ? 1 : 0);
-    setBookingSuccess(false);
     setBookingError(null);
     setIsCheckingOut(false);
     setIsProcessingPayment(false);
@@ -184,7 +179,6 @@ const HomePage = () => {
         address: kycAddress,
         phone: kycPhone
       });
-      setKycFormSubmitted(true);
       await refreshUser();
     } catch (err) {
       alert("Profile update failed: " + err);
@@ -256,7 +250,6 @@ const HomePage = () => {
 
         await client.post('/book-bike', payload);
         setPaymentStatus('confirmed');
-        setBookingSuccess(true);
         setTimeout(() => {
           setBookingStep(3); // Move to Confirmation step
           setTimeout(() => {

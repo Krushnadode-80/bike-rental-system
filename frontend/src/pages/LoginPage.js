@@ -129,7 +129,7 @@ const LoginPage = () => {
                 />
                 <label htmlFor="remember">Remember me</label>
               </div>
-              <a href="#" style={{ color: '#ff5e14', fontSize: '13px', textDecoration: 'none', fontWeight: '600' }}>Forgot?</a>
+              <span style={{ color: '#ff5e14', fontSize: '13px', cursor: 'pointer', fontWeight: '600' }}>Forgot?</span>
             </div>
 
             <button type="submit" className="premium-btn" disabled={loading}>
