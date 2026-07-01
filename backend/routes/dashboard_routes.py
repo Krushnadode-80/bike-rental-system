@@ -159,6 +159,30 @@ def delete_admin_user(
     db.commit()
     return {"message": "User deleted successfully"}
 
+@router.put("/admin/users/{user_id}")
+def update_admin_user(
+    user_id: int,
+    user_data: dict,
+    _: User = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if "name" in user_data:
+        user.name = user_data["name"]
+    if "email" in user_data:
+        user.email = user_data["email"]
+    if "role" in user_data:
+        user.role = user_data["role"]
+    if "phone" in user_data:
+        user.phone = user_data["phone"]
+        
+    db.commit()
+    db.refresh(user)
+    return {"message": "User updated successfully"}
+
 @router.post("/admin/users/{user_id}/verify")
 @router.put("/admin/users/{user_id}/verify")
 @router.post("/users/{user_id}/verify")

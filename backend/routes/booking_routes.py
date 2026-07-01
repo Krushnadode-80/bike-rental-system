@@ -72,7 +72,8 @@ async def book_bike(
         status=booking.status,
         rental_type=booking.rental_type,
         duration=booking.duration,
-        payment_status=booking.payment_status
+        payment_status=booking.payment_status,
+        updated_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     )
     db.add(new_booking)
     db.commit()
@@ -157,6 +158,8 @@ def get_bookings(
     bookings = db.query(Booking).filter(
         Booking.user_email == email
     ).all()
+    # Sort bookings newest activity first
+    bookings.sort(key=lambda b: b.updated_at or b.booking_date or "", reverse=True)
     return bookings
 
 @router.delete("/cancel-booking/{booking_id}")
@@ -176,6 +179,7 @@ def cancel_booking(
     from datetime import datetime
     booking.status = "Cancelled"
     booking.cancelled_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    booking.updated_at = booking.cancelled_at
     
     # Mark bike as available again only if no other active bookings exist
     other_active = db.query(Booking).filter(
@@ -212,6 +216,9 @@ def get_all_bookings(db: Session = Depends(get_db)):
             "status": b.status,
             "rental_type": b.rental_type,
             "duration": b.duration,
-            "payment_status": b.payment_status
+            "payment_status": b.payment_status,
+            "updated_at": b.updated_at
         })
+    # Sort bookings newest activity first
+    bookings_with_names.sort(key=lambda x: x["updated_at"] or x["booking_date"] or "", reverse=True)
     return bookings_with_names

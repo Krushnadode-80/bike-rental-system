@@ -16,3 +16,4 @@ class Booking(Base):
     payment_status = Column(String, default="Pending")
     cancelled_at = Column(String, nullable=True)
     completed_at = Column(String, nullable=True)
+    updated_at = Column(String, nullable=True)

@@ -1,0 +1,57 @@
+Bike Rental System - Backend Technology Stack
+
+1. Framework & Core
+-------------------
+- FastAPI: High-performance web framework for building APIs.
+- Uvicorn: ASGI server for running the FastAPI application.
+- Python 3.x: Core programming language.
+
+2. Database & ORM
+-----------------
+- SQLAlchemy: Object Relational Mapper (ORM) for database interactions.
+- PostgreSQL (psycopg2-binary): Primary relational database system.
+- Alembic: Database migration tool to handle schema changes.
+
+3. Authentication & Security
+----------------------------
+- Passlib (bcrypt): For secure password hashing and verification.
+- python-jose: For generating and verifying JSON Web Tokens (JWT) for user sessions.
+- Google Auth: For validating Google OAuth 2.0 sign-in tokens.
+
+4. Payment & Billing
+--------------------
+- Razorpay: Payment gateway integration for handling online transactions.
+- QRCode & Pillow: For generating dynamic UPI QR codes for payments.
+- Reportlab: For generating PDF invoices/receipts for bookings.
+
+5. External Services & Integrations
+-----------------------------------
+- Cloudinary: Cloud storage service for handling user document uploads (Aadhaar, PAN) and profile photos.
+- FastAPI-Mail: For sending emails, such as OTPs and booking confirmations.
+
+6. Utilities & Validation
+-------------------------
+- Pydantic: For robust data validation and serialization (Schemas).
+- Python-dotenv: For managing environment variables.
+- Email-validator: Extension for verifying email formats.
+
+7. Core Features & Routes
+-------------------------
+- Authentication (Auth Routes):
+  - User Registration & Login (with JWT).
+  - Google OAuth single sign-on integration.
+  - Email OTP generation and verification.
+- User Management:
+  - Document uploads (Aadhaar, PAN, Profile Photo).
+  - Admin verification workflows for user accounts.
+- Bike Inventory (Bike Routes):
+  - CRUD operations for bikes.
+  - Image handling and availability status.
+- Booking System (Booking Routes):
+  - Bike reservations and date availability checking.
+  - Booking status management.
+- Payments (Payment Routes):
+  - Razorpay order creation and payment verification.
+  - Invoice generation (PDF).
+- Dashboard & Analytics (Dashboard Routes):
+  - Aggregating data for admin metrics and reporting.

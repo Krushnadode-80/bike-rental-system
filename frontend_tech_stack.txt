@@ -1,0 +1,40 @@
+Bike Rental System - Frontend Technology Stack
+
+1. Framework
+-------------
+- React (bootstrapped with Create React App / react-scripts)
+- React DOM
+
+2. Tools
+--------
+- Node.js & npm (implied environment)
+- Jest / React Testing Library (for unit/component testing)
+- Web Vitals (for performance measuring)
+- ESLint (for linting via react-app config)
+
+3. Libraries & Dependencies
+---------------------------
+- react-router-dom: Used for routing and navigation (Routes, Route, Navigate, BrowserRouter).
+- axios: Promise-based HTTP client for making API requests to the backend.
+- @react-oauth/google: Integration for Google OAuth authentication (GoogleOAuthProvider).
+- lucide-react: Used for rendering modern, scalable SVG icons across the UI.
+- recharts: Used for rendering charts and data visualization on the Dashboard.
+
+4. Core Features
+----------------
+- Authentication System:
+  - User Registration and Login.
+  - Google OAuth single sign-on.
+  - Protected Routes ensuring only authenticated users can access specific pages.
+  - Global Auth Context to maintain session state across the app.
+- Navigation & Layout:
+  - Responsive Navbar.
+- Main Pages & User Flows:
+  - Home Page: Browse available bikes.
+  - My Bookings: View past and current bike reservations.
+  - Receipt Page: Generate and view booking receipts.
+  - Profile Management: View and edit user profile via a dedicated page and modal.
+  - Information Pages: About, Contact, and Terms & Conditions pages.
+- Admin & Analytics:
+  - Dashboard Page: Displays metrics and charts (using Recharts).
+  - Admin Bikes Page: Interface for administrators to manage bike inventory.

@@ -84,6 +84,20 @@ def ensure_users_table_columns():
         conn.execute(text("ALTER TABLE users ALTER COLUMN admin_verified SET DEFAULT FALSE"))
         conn.execute(text("ALTER TABLE users ALTER COLUMN admin_verified SET NOT NULL"))
 
+def ensure_bookings_table_columns():
+    inspector = inspect(engine)
+    if "bookings" not in inspector.get_table_names():
+        return
+    columns = inspector.get_columns("bookings")
+    existing_columns = {column["name"] for column in columns}
+    if "updated_at" not in existing_columns:
+        with engine.begin() as conn:
+            conn.execute(text("ALTER TABLE bookings ADD COLUMN updated_at VARCHAR"))
+            # For existing bookings, set updated_at to current time or their id proxy so they don't break sorting
+            import datetime
+            now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            conn.execute(text(f"UPDATE bookings SET updated_at = '{now_str}' WHERE updated_at IS NULL"))
+
 # Add CORS Middleware
 app.add_middleware(
     CORSMiddleware,
@@ -95,6 +109,7 @@ app.add_middleware(
 
 Base.metadata.create_all(bind=engine)
 ensure_users_table_columns()
+ensure_bookings_table_columns()
 
 # Create uploads dir if it doesn't exist
 if not os.path.exists("uploads"):

@@ -22,6 +22,7 @@ def auto_cleanup_rentals(db: Session):
             if now > ret_date:
                 b.status = "Completed"
                 b.completed_at = now.strftime("%Y-%m-%d %H:%M:%S")
+                b.updated_at = b.completed_at
                 # Restore bike availability only if no other active bookings exist
                 other_active = db.query(Booking).filter(
                     Booking.bike_name == b.bike_name,
