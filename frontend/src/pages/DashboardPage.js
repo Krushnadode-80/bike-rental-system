@@ -12,8 +12,6 @@ import {
   Trash2, 
   DollarSign, 
   Search, 
-  Filter,
-  Eye,
   CheckCircle,
   XCircle,
   Edit

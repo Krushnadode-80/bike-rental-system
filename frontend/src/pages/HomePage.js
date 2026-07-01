@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import client from '../api/client';
-import { Search, Filter, Banknote, CheckCircle2, ShieldCheck, UploadCloud, Smartphone, MapPin, CreditCard, QrCode, Bike as BikeIcon, X, ArrowLeft } from 'lucide-react';
+import { Banknote, CheckCircle2, ShieldCheck, UploadCloud, Bike as BikeIcon, X, ArrowLeft } from 'lucide-react';
 import '../Home.css'; // Import the new Home styles
 
 const HomePage = () => {
@@ -32,9 +32,6 @@ const HomePage = () => {
   const [totalPrice, setTotalPrice] = useState(0);
   const [durationDays, setDurationDays] = useState(1);
   const [durationHours, setDurationHours] = useState(0);
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('razorpay'); // 'razorpay' or 'upi'
-  const [qrCodeData, setQrCodeData] = useState(null);
   const [bookingError, setBookingError] = useState(null);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
@@ -150,9 +147,7 @@ const HomePage = () => {
     setShowBookingModal(true);
     setBookingStep(isKycComplete ? 1 : 0);
     setBookingError(null);
-    setIsCheckingOut(false);
     setIsProcessingPayment(false);
-    setQrCodeData(null);
     setBookingDate(new Date().toISOString().split('T')[0]);
     setReturnDate('');
     setPickupTime('09:00');
