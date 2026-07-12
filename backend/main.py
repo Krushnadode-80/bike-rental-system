@@ -12,6 +12,7 @@ load_dotenv()
 from models.user_model import User
 from models.bike_model import Bike
 from models.booking_model import Booking
+from seed_data import seed_database
 
 from routes.auth_routes import router as auth_router
 from routes.bike_routes import router as bike_router
@@ -107,9 +108,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-Base.metadata.create_all(bind=engine)
-ensure_users_table_columns()
-ensure_bookings_table_columns()
+@app.on_event("startup")
+def startup_db_init():
+    Base.metadata.create_all(bind=engine)
+    ensure_users_table_columns()
+    ensure_bookings_table_columns()
+    seed_database()
 
 # Create uploads dir if it doesn't exist
 if not os.path.exists("uploads"):
