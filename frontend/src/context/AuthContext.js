@@ -55,7 +55,7 @@ export const AuthProvider = ({ children }) => {
       await fetchMe();
       return res.data;
     } catch (err) {
-      throw err.response?.data?.detail || 'Google Login failed';
+      throw err.response?.data?.detail || err.message || 'Google Login failed';
     }
   };
 

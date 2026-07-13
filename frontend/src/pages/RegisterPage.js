@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { User, Mail, Phone, Lock, Bike, Shield, Headphones } from 'lucide-react';
+import { User, Mail, Phone, Lock, Bike, Shield, Headphones, Eye, EyeOff } from 'lucide-react';
 import { GoogleLogin } from '@react-oauth/google';
 import '../Auth.css'; // Import our new premium styles
 
 const RegisterPage = () => {
-  const { register } = useAuth();
+  const { register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
   const [name, setName] = useState('');
@@ -14,6 +14,8 @@ const RegisterPage = () => {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
 
@@ -127,7 +129,19 @@ const RegisterPage = () => {
                 <label>Password</label>
                 <div className={`premium-input-wrapper ${isFilled(password) ? 'active' : ''}`}>
                   <Lock size={18} />
-                  <input type="password" className={`premium-input ${isFilled(password) ? 'active' : ''}`} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    className={`premium-input ${isFilled(password) ? 'active' : ''}`}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                  {showPassword ? (
+                    <EyeOff size={18} className="password-toggle-icon" onClick={() => setShowPassword(false)} />
+                  ) : (
+                    <Eye size={18} className="password-toggle-icon" onClick={() => setShowPassword(true)} />
+                  )}
                 </div>
               </div>
 
@@ -135,7 +149,19 @@ const RegisterPage = () => {
                 <label>Confirm Password</label>
                 <div className={`premium-input-wrapper ${isFilled(confirmPassword) ? 'active' : ''}`}>
                   <Lock size={18} />
-                  <input type="password" className={`premium-input ${isFilled(confirmPassword) ? 'active' : ''}`} placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    className={`premium-input ${isFilled(confirmPassword) ? 'active' : ''}`}
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                  />
+                  {showConfirmPassword ? (
+                    <EyeOff size={18} className="password-toggle-icon" onClick={() => setShowConfirmPassword(false)} />
+                  ) : (
+                    <Eye size={18} className="password-toggle-icon" onClick={() => setShowConfirmPassword(true)} />
+                  )}
                 </div>
               </div>
             </div>
@@ -170,23 +196,19 @@ const RegisterPage = () => {
                 shape="pill"
                 width="400"
                 onSuccess={async (credentialResponse) => {
-                  const response = await fetch("http://localhost:8000/google-login", {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                      token: credentialResponse.credential,
-                    }),
-                  });
-
-                  const data = await response.json();
-
-                  if (response.ok) {
-                    localStorage.setItem("token", data.access_token);
-                    window.location.href = "/";
-                  } else {
-                    alert("Google Signup Failed");
+                  try {
+                    await loginWithGoogle(credentialResponse.credential);
+                    const userStr = localStorage.getItem('user');
+                    if (userStr) {
+                      const userObj = JSON.parse(userStr);
+                      if (userObj.role === 'admin') {
+                        navigate('/dashboard');
+                        return;
+                      }
+                    }
+                    navigate('/');
+                  } catch (err) {
+                    alert(err);
                   }
                 }}
                 onError={() => {

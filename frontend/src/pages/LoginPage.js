@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Mail, Lock, Bike, Shield, Headphones } from 'lucide-react';
+import { Mail, Lock, Bike, Shield, Headphones, Eye, EyeOff } from 'lucide-react';
 import { GoogleLogin } from '@react-oauth/google';
 import '../Auth.css';
 
@@ -11,6 +11,7 @@ const LoginPage = () => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -109,13 +110,18 @@ const LoginPage = () => {
               <div className={`premium-input-wrapper ${isFilled(password) ? 'active' : ''}`}>
                 <Lock size={18} />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   className={`premium-input ${isFilled(password) ? 'active' : ''}`}
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
+                {showPassword ? (
+                  <EyeOff size={18} className="password-toggle-icon" onClick={() => setShowPassword(false)} />
+                ) : (
+                  <Eye size={18} className="password-toggle-icon" onClick={() => setShowPassword(true)} />
+                )}
               </div>
             </div>
 
@@ -162,7 +168,7 @@ const LoginPage = () => {
                     }
                     navigate('/');
                   } catch (err) {
-                    alert("Google Login Failed");
+                    alert(err);
                   }
                 }}
                 onError={() => {

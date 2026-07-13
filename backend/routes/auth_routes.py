@@ -321,7 +321,12 @@ def google_login(request: GoogleLoginRequest, db: Session = Depends(get_db)):
     try:
         GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
         
-        idinfo = id_token.verify_oauth2_token(request.token, requests.Request(), GOOGLE_CLIENT_ID)
+        idinfo = id_token.verify_oauth2_token(
+            request.token, 
+            requests.Request(), 
+            GOOGLE_CLIENT_ID,
+            clock_skew_in_seconds=10
+        )
         
         email = idinfo['email']
         name = idinfo.get('name', 'Google User')

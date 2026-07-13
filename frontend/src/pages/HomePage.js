@@ -227,37 +227,83 @@ const HomePage = () => {
     setIsProcessingPayment(true);
     setPaymentStatus('verifying');
     
-    // Simulate secure digital payment verification
-    setTimeout(async () => {
-      try {
-        const payload = {
-          user_email: user.email,
-          bike_name: selectedBike.bike_name,
-          booking_date: bookingDate,
-          return_date: returnDate,
-          total_price: totalPrice,
-          image_url: selectedBike.image_url,
-          status: "Booked",
-          rental_type: rentalType === 'hourly' ? "Hourly" : "Daily",
-          duration: rentalType === 'hourly' ? `${durationHours} Hours` : `${durationDays} Days`,
-          payment_status: "Paid"
-        };
+    try {
+      // 1. Create order on backend
+      const orderRes = await client.post('/create-order', { amount: totalPrice });
+      const order = orderRes.data.order;
 
-        await client.post('/book-bike', payload);
-        setPaymentStatus('confirmed');
-        setTimeout(() => {
-          setBookingStep(3); // Move to Confirmation step
-          setTimeout(() => {
-            setShowBookingModal(false);
-            navigate('/my-bookings');
-          }, 3000);
-        }, 1000);
-      } catch (err) {
-        setBookingError(err.response?.data?.detail || "Booking transaction failed. Double-booking conflict occurred.");
+      // 2. Initialize Razorpay
+      const options = {
+        key: "rzp_test_SpmwJjd4Zinz8T",
+        amount: order.amount,
+        currency: order.currency,
+        name: "MotorCity Premium Rentals",
+        description: `Booking for ${selectedBike.bike_name}`,
+        order_id: order.id,
+        handler: async function (response) {
+          try {
+            // Verify payment
+            await client.post('/verify-payment', {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
+            });
+
+            // If verification successful, create the booking
+            const payload = {
+              user_email: user.email,
+              bike_name: selectedBike.bike_name,
+              booking_date: bookingDate,
+              return_date: returnDate,
+              total_price: totalPrice,
+              image_url: selectedBike.image_url,
+              status: "Booked",
+              rental_type: rentalType === 'hourly' ? "Hourly" : "Daily",
+              duration: rentalType === 'hourly' ? `${durationHours} Hours` : `${durationDays} Days`,
+              payment_status: "Paid"
+            };
+
+            await client.post('/book-bike', payload);
+            setPaymentStatus('confirmed');
+            
+            setTimeout(() => {
+              setBookingStep(3); // Move to Confirmation step
+              setTimeout(() => {
+                setShowBookingModal(false);
+                navigate('/my-bookings');
+              }, 3000);
+            }, 1000);
+
+          } catch (err) {
+            setBookingError(err.response?.data?.detail || "Verification failed after payment.");
+            setIsProcessingPayment(false);
+            setPaymentStatus('pending');
+          }
+        },
+        prefill: {
+          name: user.name,
+          email: user.email,
+          contact: user.phone || ""
+        },
+        theme: {
+          color: "#ff5e14"
+        }
+      };
+
+      const rzp1 = new window.Razorpay(options);
+      
+      rzp1.on('payment.failed', function (response){
+        setBookingError("Payment failed: " + response.error.description);
         setIsProcessingPayment(false);
         setPaymentStatus('pending');
-      }
-    }, 2000);
+      });
+
+      rzp1.open();
+    } catch (err) {
+      setBookingError("Failed to initiate Razorpay checkout. " + (err.response?.data?.detail || err.message));
+      setIsProcessingPayment(false);
+      setPaymentStatus('pending');
+    }
   };
 
   const isKycComplete = user && 
@@ -278,8 +324,11 @@ const HomePage = () => {
           <h1>Anywhere</h1>
           <p>Choose from premium bikes and enjoy your ride. We provide the most reliable and affordable rental services in the city.</p>
           <div className="hero-buttons">
-            <button className="btn-hero-primary">Explore Bikes</button>
-            <button className="btn-hero-secondary">How It Works</button>
+            <button className="btn-hero-primary" onClick={() => {
+              const el = document.getElementById('bikes-collection');
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }}>Explore Bikes</button>
+            <button className="btn-hero-secondary" onClick={() => navigate('/about#how-it-works')}>How It Works</button>
           </div>
         </div>
       </section>
@@ -322,7 +371,7 @@ const HomePage = () => {
         </div>
       </div>
 
-      <h2 className="section-title">Our Premium Collection</h2>
+      <h2 id="bikes-collection" className="section-title">Our Premium Collection</h2>
 
       {/* Bikes Grid */}
       <div className="bikes-grid-container">
@@ -435,10 +484,10 @@ const HomePage = () => {
               </div>
 
               <div className="booking-steps">
-                <div className={`booking-step-item ${bookingStep === 0 ? 'active' : ''}`}>0. Profile</div>
-                <div className={`booking-step-item ${bookingStep === 1 ? 'active' : ''}`}>1. Rental Info</div>
-                <div className={`booking-step-item ${bookingStep === 2 ? 'active' : ''}`}>2. Payment</div>
-                <div className={`booking-step-item ${bookingStep === 3 ? 'active' : ''}`} style={{ color: bookingStep === 3 ? '#10b981' : '#475569' }}>3. Confirmation</div>
+                <div className={`booking-step-item ${bookingStep === 0 ? 'active' : (bookingStep > 0 ? 'completed' : '')}`}>Profile</div>
+                <div className={`booking-step-item ${bookingStep === 1 ? 'active' : (bookingStep > 1 ? 'completed' : '')}`}>Rental Info</div>
+                <div className={`booking-step-item ${bookingStep === 2 ? 'active' : (bookingStep > 2 ? 'completed' : '')}`}>Payment</div>
+                <div className={`booking-step-item ${bookingStep === 3 ? 'active success' : ''}`}>Confirmation</div>
               </div>
 
               <div className="booking-sidebar-footer">
@@ -620,21 +669,6 @@ const HomePage = () => {
                   <h2 className="booking-main-title">Secure Checkout</h2>
                   <p className="booking-main-subtitle">Choose your preferred digital payment method.</p>
 
-                  <div className="digital-payment-toggle" style={{ display: 'flex', background: '#f1f5f9', borderRadius: '12px', padding: '6px', marginBottom: '24px' }}>
-                    <button 
-                      onClick={() => setDigitalPaymentMethod('upi')}
-                      style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', background: digitalPaymentMethod === 'upi' ? '#ffffff' : 'transparent', color: digitalPaymentMethod === 'upi' ? '#0f172a' : '#64748b', fontWeight: 700, boxShadow: digitalPaymentMethod === 'upi' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none', cursor: 'pointer', transition: 'all 0.2s' }}
-                    >
-                      UPI Payment
-                    </button>
-                    <button 
-                      onClick={() => setDigitalPaymentMethod('netbanking')}
-                      style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', background: digitalPaymentMethod === 'netbanking' ? '#ffffff' : 'transparent', color: digitalPaymentMethod === 'netbanking' ? '#0f172a' : '#64748b', fontWeight: 700, boxShadow: digitalPaymentMethod === 'netbanking' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none', cursor: 'pointer', transition: 'all 0.2s' }}
-                    >
-                      Net Banking
-                    </button>
-                  </div>
-
                   <div className="billing-summary-card" style={{ background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', padding: '24px', borderRadius: '16px', color: '#ffffff', marginBottom: '24px', position: 'relative', overflow: 'hidden' }}>
                     <div style={{ position: 'absolute', top: '-20px', right: '-20px', opacity: 0.1 }}>
                       <ShieldCheck size={120} />
@@ -655,21 +689,6 @@ const HomePage = () => {
                       <span style={{ color: '#fbbf24' }}>₹{totalPrice}</span>
                     </div>
                   </div>
-
-                  {digitalPaymentMethod === 'upi' ? (
-                    <div className="cc-form-group">
-                      <label className="cc-form-label" style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span>Enter UPI ID</span>
-                        <span style={{ color: '#10b981', fontSize: '11px' }}>Google Pay, PhonePe, Paytm accepted</span>
-                      </label>
-                      <input type="text" className="cc-input" placeholder="e.g. username@ybl or 9876543210@paytm" value={upiId} onChange={(e) => setUpiId(e.target.value)} disabled={isProcessingPayment} />
-                    </div>
-                  ) : (
-                    <div className="cc-form-group" style={{ textAlign: 'center', padding: '20px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', color: '#64748b' }}>
-                      <Banknote size={32} style={{ margin: '0 auto 10px auto', color: '#94a3b8' }} />
-                      <p style={{ fontSize: '14px' }}>You will be redirected to your bank's secure portal upon clicking Pay.</p>
-                    </div>
-                  )}
 
                   {paymentStatus === 'verifying' && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'center', margin: '16px 0', color: '#ff5e14', fontWeight: 600 }}>
@@ -692,7 +711,7 @@ const HomePage = () => {
                       onClick={handleConfirmPayment} 
                       className="cc-pay-btn" 
                       style={{ flex: 2, marginTop: 0, background: paymentStatus === 'confirmed' ? '#10b981' : undefined }} 
-                      disabled={isProcessingPayment || (digitalPaymentMethod === 'upi' && !upiId)}
+                      disabled={isProcessingPayment}
                     >
                       {paymentStatus === 'verifying' ? "Processing..." : paymentStatus === 'confirmed' ? "Confirmed" : `Pay ₹${totalPrice}`}
                     </button>

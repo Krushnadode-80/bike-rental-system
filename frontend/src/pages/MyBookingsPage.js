@@ -111,8 +111,8 @@ const MyBookingsPage = () => {
       
       {/* Dark Premium Hero Header */}
       <div style={{ 
-        backgroundColor: '#0f172a', 
-        padding: '80px 20px', 
+        background: 'linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.95)), url("https://images.unsplash.com/photo-1449426468159-d96dbf08f19f?q=80&w=1920") no-repeat center center/cover', 
+        padding: '100px 20px 120px 20px', 
         textAlign: 'center', 
         color: '#fff',
         boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
@@ -153,6 +153,7 @@ const MyBookingsPage = () => {
             {bookings.map(booking => {
               const statusStyle = getStatusStyle(booking.status);
               const isActive = booking.status === 'Booked';
+              const qrData = encodeURIComponent(`Bike: ${booking.bike_name} | ID: BR-${booking.id}9X | Dates: ${booking.booking_date} to ${booking.return_date || booking.booking_date} | Amount: Rs.${booking.total_price} | Status: ${booking.status}`);
 
               return (
                 /* VIP Digital Ticket Card */
@@ -212,8 +213,12 @@ const MyBookingsPage = () => {
 
                   {/* Right Side: Ticket Stub / Actions */}
                   <div style={{ flex: '1 1 200px', padding: '30px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#fdfdfd' }}>
-                    <div style={{ padding: '12px', backgroundColor: '#f1f5f9', borderRadius: '12px', marginBottom: '20px' }}>
-                      <QrCode size={48} color="#94a3b8" />
+                    <div style={{ padding: '8px', backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', marginBottom: '20px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
+                      <img 
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=10&data=${qrData}`} 
+                        alt="Scan for Details" 
+                        style={{ width: '70px', height: '70px', display: 'block' }}
+                      />
                     </div>
                     <p style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 700, letterSpacing: '2px', marginBottom: '24px' }}>ID: BR-{booking.id}9X</p>
                     
@@ -261,90 +266,93 @@ const MyBookingsPage = () => {
                 
                 {/* Background Watermark */}
                 <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(-30deg)', opacity: 0.03, pointerEvents: 'none', zIndex: 0 }}>
-                  <Calendar size={400} color="#0f172a" />
+                  <Calendar size={320} color="#0f172a" />
                 </div>
 
                 {/* Luxury Header */}
-                <div style={{ backgroundColor: '#0f172a', padding: '40px', position: 'relative', overflow: 'hidden', zIndex: 1 }}>
-                  <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '100px', height: '100px', background: 'radial-gradient(circle, #ff5e14 0%, transparent 70%)', opacity: 0.3 }}></div>
+                <div style={{ backgroundColor: '#0f172a', padding: '30px', position: 'relative', overflow: 'hidden', zIndex: 1 }}>
+                  <div style={{ position: 'absolute', top: '-15px', right: '-15px', width: '90px', height: '90px', background: 'radial-gradient(circle, #ff5e14 0%, transparent 70%)', opacity: 0.3 }}></div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
-                      <h3 style={{ fontSize: '32px', fontWeight: 900, letterSpacing: '3px', margin: 0, color: '#fff', textTransform: 'uppercase' }}>Invoice</h3>
-                      <p style={{ color: '#ff5e14', fontSize: '13px', marginTop: '6px', fontWeight: 800, letterSpacing: '1px' }}>MOTORCITY PREMIUM RENTALS</p>
+                      <h3 style={{ fontSize: '28px', fontWeight: 900, letterSpacing: '2px', margin: 0, color: '#fff', textTransform: 'uppercase' }}>Invoice</h3>
+                      <p style={{ color: '#ff5e14', fontSize: '12px', marginTop: '4px', fontWeight: 800, letterSpacing: '1px' }}>MOTORCITY PREMIUM RENTALS</p>
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <p style={{ color: '#94a3b8', fontSize: '11px', margin: 0, textTransform: 'uppercase', letterSpacing: '1px' }}>Booking Date</p>
-                      <p style={{ color: '#fff', fontSize: '14px', margin: '4px 0 0 0', fontWeight: 700 }}>{new Date().toLocaleDateString('en-GB')}</p>
+                      <p style={{ color: '#fff', fontSize: '14px', margin: '3px 0 0 0', fontWeight: 700 }}>{new Date().toLocaleDateString('en-GB')}</p>
                     </div>
                   </div>
                 </div>
 
-                <div style={{ padding: '40px', position: 'relative', zIndex: 1 }}>
+                <div style={{ padding: '30px', position: 'relative', zIndex: 1 }}>
                   
                   {/* Status Stamp */}
-                  <div style={{ position: 'absolute', top: '20px', right: '40px', transform: 'rotate(15deg)', border: `4px solid ${selectedInvoice.status === 'Cancelled' ? '#ef4444' : '#10b981'}`, color: selectedInvoice.status === 'Cancelled' ? '#ef4444' : '#10b981', padding: '8px 24px', borderRadius: '12px', fontSize: '24px', fontWeight: 900, letterSpacing: '4px', opacity: 0.8 }}>
+                  <div style={{ position: 'absolute', top: '16px', right: '30px', transform: 'rotate(15deg)', border: `4px solid ${selectedInvoice.status === 'Cancelled' ? '#ef4444' : '#10b981'}`, color: selectedInvoice.status === 'Cancelled' ? '#ef4444' : '#10b981', padding: '6px 20px', borderRadius: '10px', fontSize: '20px', fontWeight: 900, letterSpacing: '3px', opacity: 0.8 }}>
                     {selectedInvoice.status === 'Cancelled' ? 'CANCELLED' : (selectedInvoice.payment_status || 'PAID')}
                   </div>
 
                   {/* Rider & Booking Info */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '40px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '32px' }}>
                     <div>
-                      <p style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: '#64748b', margin: '0 0 8px 0', fontWeight: 800 }}>Customer Name</p>
-                      <p style={{ fontSize: '16px', fontWeight: 900, color: '#0f172a', margin: '0 0 4px 0' }}>{user?.name || user?.email || 'VIP Guest'}</p>
+                      <p style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: '#64748b', margin: '0 0 6px 0', fontWeight: 800 }}>Customer Name</p>
+                      <p style={{ fontSize: '15px', fontWeight: 900, color: '#0f172a', margin: '0 0 3px 0' }}>{user?.name || user?.email || 'VIP Guest'}</p>
                       <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>{user?.email || selectedInvoice.user_email}</p>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <p style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: '#64748b', margin: '0 0 8px 0', fontWeight: 800 }}>Booking ID</p>
-                      <p style={{ fontSize: '16px', fontWeight: 900, color: '#0f172a', margin: '0 0 4px 0' }}>BR-{selectedInvoice.id}9382X</p>
+                    <div style={{ textAlign: 'right', marginRight: '60px' }}> {/* right margin to avoid stamp overlap */}
+                      <p style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: '#64748b', margin: '0 0 6px 0', fontWeight: 800 }}>Booking ID</p>
+                      <p style={{ fontSize: '15px', fontWeight: 900, color: '#0f172a', margin: '0 0 3px 0' }}>BR-{selectedInvoice.id}9382X</p>
                       <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>Status: {selectedInvoice.status === 'Cancelled' ? 'Cancelled' : 'Confirmed'}</p>
                     </div>
                   </div>
 
                   {/* Rental Details Table */}
-                  <div style={{ marginBottom: '40px', border: '1px solid #e2e8f0', borderRadius: '12px', overflow: 'hidden' }}>
-                    <div style={{ display: 'flex', backgroundColor: '#f8fafc', padding: '16px 20px', borderBottom: '1px solid #e2e8f0' }}>
-                      <div style={{ flex: 2, fontSize: '12px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '1px' }}>Bike Name</div>
-                      <div style={{ flex: 1.5, fontSize: '12px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '1px', textAlign: 'center' }}>Pickup & Return Date</div>
-                      <div style={{ flex: 1, fontSize: '12px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '1px', textAlign: 'right' }}>Total Amount</div>
+                  <div style={{ marginBottom: '32px', border: '1px solid #e2e8f0', borderRadius: '10px', overflow: 'hidden' }}>
+                    <div style={{ display: 'flex', backgroundColor: '#f8fafc', padding: '12px 18px', borderBottom: '1px solid #e2e8f0' }}>
+                      <div style={{ flex: 2, fontSize: '11px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '1px' }}>Bike Name</div>
+                      <div style={{ flex: 1.5, fontSize: '11px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '1px', textAlign: 'center' }}>Dates</div>
+                      <div style={{ flex: 1, fontSize: '11px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '1px', textAlign: 'right' }}>Total</div>
                     </div>
                     
-                    <div style={{ display: 'flex', padding: '24px 20px', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', padding: '16px 18px', alignItems: 'center' }}>
                       <div style={{ flex: 2 }}>
-                        <p style={{ margin: '0 0 6px 0', fontSize: '16px', fontWeight: 900, color: '#0f172a' }}>{selectedInvoice.bike_name}</p>
-                        <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>Premium Motorcycle Rental</p>
+                        <p style={{ margin: '0 0 4px 0', fontSize: '15px', fontWeight: 900, color: '#0f172a' }}>{selectedInvoice.bike_name}</p>
+                        <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>Premium Rental</p>
                       </div>
-                      <div style={{ flex: 1.5, textAlign: 'center', fontSize: '14px', fontWeight: 700, color: '#334155' }}>
+                      <div style={{ flex: 1.5, textAlign: 'center', fontSize: '13px', fontWeight: 700, color: '#334155' }}>
                         {selectedInvoice.booking_date} <br/> to <br/> {selectedInvoice.return_date || selectedInvoice.booking_date}
                       </div>
-                      <div style={{ flex: 1, textAlign: 'right', fontSize: '16px', fontWeight: 900, color: '#0f172a' }}>
+                      <div style={{ flex: 1, textAlign: 'right', fontSize: '15px', fontWeight: 900, color: '#0f172a' }}>
                         ₹{selectedInvoice.total_price}
                       </div>
                     </div>
                   </div>
 
                   {/* Total Amount Section */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px' }}>
                     
-                    <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-                      <div style={{ padding: '16px', backgroundColor: '#f1f5f9', borderRadius: '12px' }}>
-                        <QrCode size={40} color="#475569" />
+                    <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                      <div style={{ padding: '8px', backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                        <img 
+                          src={`https://barcode.tec-it.com/barcode.ashx?data=BR-${selectedInvoice.id}9382X&code=Code128&translate-esc=on`} 
+                          alt="Barcode" 
+                          style={{ height: '40px', width: 'auto', display: 'block' }} 
+                        />
                       </div>
                       <div>
-                         <p style={{ fontFamily: 'monospace', fontSize: '24px', letterSpacing: '1px', color: '#1e293b', margin: '0 0 4px 0' }}>|||| || ||| | || ||</p>
-                         <p style={{ fontSize: '10px', color: '#94a3b8', letterSpacing: '3px', margin: 0 }}>SCAN TO VERIFY</p>
+                         <p style={{ fontSize: '10px', color: '#94a3b8', letterSpacing: '2px', margin: 0 }}>SCAN TO VERIFY</p>
                       </div>
                     </div>
 
                     <div style={{ textAlign: 'right' }}>
-                      <p style={{ fontSize: '13px', textTransform: 'uppercase', letterSpacing: '1px', color: '#64748b', margin: '0 0 8px 0', fontWeight: 800 }}>{selectedInvoice.status === 'Cancelled' ? 'Refund Processed' : 'Total Paid'}</p>
-                      <h2 style={{ fontSize: '42px', fontWeight: 900, color: '#ff5e14', margin: 0 }}>₹{selectedInvoice.total_price}</h2>
+                      <p style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', color: '#64748b', margin: '0 0 6px 0', fontWeight: 800 }}>{selectedInvoice.status === 'Cancelled' ? 'Refund Processed' : 'Total Paid'}</p>
+                      <h2 style={{ fontSize: '38px', fontWeight: 900, color: '#ff5e14', margin: 0 }}>₹{selectedInvoice.total_price}</h2>
                     </div>
 
                   </div>
 
                   {/* Footer Terms */}
-                  <div style={{ borderTop: '2px dashed #e2e8f0', paddingTop: '24px', textAlign: 'center' }}>
-                    <p style={{ fontSize: '12px', color: '#94a3b8', margin: '0 0 4px 0', fontWeight: 600 }}>Thank you for riding with MotorCity Premium Rentals.</p>
+                  <div style={{ borderTop: '2px dashed #e2e8f0', paddingTop: '20px', textAlign: 'center' }}>
+                    <p style={{ fontSize: '12px', color: '#94a3b8', margin: '0 0 3px 0', fontWeight: 600 }}>Thank you for riding with MotorCity Premium Rentals.</p>
                     <p style={{ fontSize: '11px', color: '#cbd5e1', margin: 0 }}>Contact: support@motorcity.com | Roadside Assistance: 1800-RIDE-NOW</p>
                   </div>
 

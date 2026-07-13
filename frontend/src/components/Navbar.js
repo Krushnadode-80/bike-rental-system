@@ -3,7 +3,6 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Bike } from 'lucide-react';
 import ProfileModal from './ProfileModal';
-import ThemeSwitcher from './ThemeSwitcher';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -52,7 +51,6 @@ const Navbar = () => {
 
         {/* Right Section */}
         <div className="main-navbar-right">
-          <ThemeSwitcher />
           {user ? (
             <>
               {user.role !== 'admin' && (

@@ -1,8 +1,20 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Bike, Shield, Clock, Award } from 'lucide-react';
 import '../Home.css'; // Reuse existing styles
 
 const AboutPage = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash === '#how-it-works') {
+      const element = document.getElementById('how-it-works');
+      if (element) {
+        setTimeout(() => element.scrollIntoView({ behavior: 'smooth' }), 100);
+      }
+    }
+  }, [location]);
+
   return (
     <div style={{ backgroundColor: '#ffffff', minHeight: '100vh', color: '#1e293b' }}>
 
@@ -79,6 +91,28 @@ const AboutPage = () => {
             <p style={{ fontSize: '14px', color: '#64748b', lineHeight: '1.6' }}>Transparent, competitive pricing with absolutely zero hidden fees.</p>
           </div>
 
+        </div>
+
+        {/* How It Works Section */}
+        <div id="how-it-works" style={{ marginTop: '100px', marginBottom: '100px' }}>
+          <h2 style={{ textAlign: 'center', fontSize: '32px', fontWeight: 800, marginBottom: '40px' }}>How It Works</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '30px', position: 'relative' }}>
+            <div style={{ padding: '30px', textAlign: 'center' }}>
+              <div style={{ width: '80px', height: '80px', backgroundColor: '#ff5e14', color: 'white', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto 20px auto', fontSize: '24px', fontWeight: 'bold', boxShadow: '0 10px 20px rgba(255, 94, 20, 0.3)' }}>1</div>
+              <h3 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '12px' }}>Choose Your Ride</h3>
+              <p style={{ color: '#64748b', lineHeight: '1.6' }}>Browse our premium collection and pick the perfect bike for your journey.</p>
+            </div>
+            <div style={{ padding: '30px', textAlign: 'center' }}>
+              <div style={{ width: '80px', height: '80px', backgroundColor: '#ff5e14', color: 'white', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto 20px auto', fontSize: '24px', fontWeight: 'bold', boxShadow: '0 10px 20px rgba(255, 94, 20, 0.3)' }}>2</div>
+              <h3 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '12px' }}>Book & Verify</h3>
+              <p style={{ color: '#64748b', lineHeight: '1.6' }}>Complete a quick KYC and secure your booking with our safe digital payment.</p>
+            </div>
+            <div style={{ padding: '30px', textAlign: 'center' }}>
+              <div style={{ width: '80px', height: '80px', backgroundColor: '#ff5e14', color: 'white', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto 20px auto', fontSize: '24px', fontWeight: 'bold', boxShadow: '0 10px 20px rgba(255, 94, 20, 0.3)' }}>3</div>
+              <h3 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '12px' }}>Hit The Road</h3>
+              <p style={{ color: '#64748b', lineHeight: '1.6' }}>Pick up your bike at the scheduled time and enjoy your adventure.</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

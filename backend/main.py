@@ -1,5 +1,8 @@
+# pyrefly: ignore [missing-import]
 from fastapi import FastAPI
+# pyrefly: ignore [missing-import]
 from fastapi.middleware.cors import CORSMiddleware
+# pyrefly: ignore [missing-import]
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import inspect, text
 import sqlalchemy as sa
@@ -102,7 +105,7 @@ def ensure_bookings_table_columns():
 # Add CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -110,10 +113,13 @@ app.add_middleware(
 
 @app.on_event("startup")
 def startup_db_init():
-    Base.metadata.create_all(bind=engine)
-    ensure_users_table_columns()
-    ensure_bookings_table_columns()
-    seed_database()
+    try:
+        Base.metadata.create_all(bind=engine)
+        ensure_users_table_columns()
+        ensure_bookings_table_columns()
+        seed_database()
+    except Exception as e:
+        print(f"DATABASE INITIALIZATION ERROR: {e}")
 
 # Create uploads dir if it doesn't exist
 if not os.path.exists("uploads"):
@@ -132,3 +138,5 @@ def home():
     return {
         "message": "Bike Rental API Running"
     }
+
+# Trigger reload
