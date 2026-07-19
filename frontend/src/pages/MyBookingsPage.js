@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import client from '../api/client';
-import { Calendar, Trash2, CheckCircle2, XCircle, Clock, Download, MapPin, QrCode, AlertCircle } from 'lucide-react';
+import { Calendar, Trash2, CheckCircle2, XCircle, Clock, Download, MapPin, AlertCircle } from 'lucide-react';
 import '../Home.css';
 
 import { Link } from 'react-router-dom';

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import client from '../api/client';
-import { Banknote, CheckCircle2, ShieldCheck, UploadCloud, Bike as BikeIcon, X, ArrowLeft } from 'lucide-react';
+import { CheckCircle2, ShieldCheck, UploadCloud, Bike as BikeIcon, X, ArrowLeft } from 'lucide-react';
 import '../Home.css'; // Import the new Home styles
 
 const HomePage = () => {
@@ -36,8 +36,6 @@ const HomePage = () => {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   // Digital Payment State
-  const [digitalPaymentMethod, setDigitalPaymentMethod] = useState('upi');
-  const [upiId, setUpiId] = useState('');
   const [paymentStatus, setPaymentStatus] = useState('pending'); // pending, verifying, confirmed
 
   // KYC Verification Form State (Inside Modal)
@@ -152,7 +150,6 @@ const HomePage = () => {
     setReturnDate('');
     setPickupTime('09:00');
     setReturnTime('18:00');
-    setUpiId('');
     setPaymentStatus('pending');
   };
 
