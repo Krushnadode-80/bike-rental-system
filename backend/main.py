@@ -103,9 +103,14 @@ def ensure_bookings_table_columns():
             conn.execute(text(f"UPDATE bookings SET updated_at = '{now_str}' WHERE updated_at IS NULL"))
 
 # Add CORS Middleware
+origins = [
+    "http://localhost:3000",
+    "https://bike-rental-system-6ticnwvq5-krushnadode-80s-projects.vercel.app",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
