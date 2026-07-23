@@ -316,6 +316,10 @@ def update_profile(
     db.commit()
     return {"message": "Profile updated successfully"}
 
+@router.options("/google-login")
+def google_login_options():
+    return {"message": "OK"}
+
 @router.post("/google-login")
 def google_login(request: GoogleLoginRequest, db: Session = Depends(get_db)):
     try:
