@@ -105,12 +105,12 @@ def ensure_bookings_table_columns():
 # Add CORS Middleware
 origins = [
     "http://localhost:3000",
-    "https://bike-rental-system-2xeo50ye0-krushnadode-80s-projects.vercel.app",
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_origin_regex=r"https://bike-rental-system-.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
